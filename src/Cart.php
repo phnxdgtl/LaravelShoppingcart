@@ -269,7 +269,9 @@ class Cart
     }
 
     /**
-     * Get the total price of the items in the cart.
+     * Get the total price of the items in the cart, plus tax
+     * #phnxdgtl: note that this no longer counts the tax owing on individual items
+     * but instead works out the tax owing on the entire basket
      *
      * @param int    $decimals
      * @param string $decimalPoint
@@ -280,15 +282,20 @@ class Cart
     {
         $content = $this->getContent();
 
-        $total = $content->reduce(function ($total, CartItem $cartItem) {
-            return $total + ($cartItem->qty * $cartItem->priceTax);
+        $total_ex_tax = $content->reduce(function ($total, CartItem $cartItem) {
+            return $total + $cartItem->subtotal;
         }, 0);
 
-        $totalCost = $this->extraCosts->reduce(function ($total, $cost) {
+        $totalCost_ex_tax = $this->extraCosts->reduce(function ($total, $cost) {
             return $total + $cost;
         }, 0);
 
-        $total += $totalCost;
+        $total_ex_tax += $totalCost_ex_tax;
+
+        /**
+         * #phnxdgtl Add tax to the entire basket
+         **/
+        $total = $total_ex_tax + $this->tax();
 
         return $this->numberFormat($total, $decimals, $decimalPoint, $thousandSeparator);
     }
@@ -305,9 +312,17 @@ class Cart
     {
         $content = $this->getContent();
 
-        $tax = $content->reduce(function ($tax, CartItem $cartItem) {
-            return $tax + ($cartItem->qty * $cartItem->tax);
+        $total_ex_tax = $content->reduce(function ($total, CartItem $cartItem) {
+            return $total + $cartItem->subtotal;
         }, 0);
+
+        $totalCost_ex_tax = $this->extraCosts->reduce(function ($total, $cost) {
+            return $total + $cost;
+        }, 0);
+
+        $total_ex_tax += $totalCost_ex_tax;
+
+        $tax = $total_ex_tax * (config('cart.tax') / 100);
 
         return $this->numberFormat($tax, $decimals, $decimalPoint, $thousandSeparator);
     }
