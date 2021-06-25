@@ -7,6 +7,7 @@
 
 A simple shoppingcart implementation for Laravel 5, 6 and 7.
 
+This is a fork maintained by phnxdgtl which impements a more UK-centric tax approach.
 ## Installation
 
 Install the package through [Composer](http://getcomposer.org/).
