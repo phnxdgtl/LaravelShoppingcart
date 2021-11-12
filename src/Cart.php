@@ -295,7 +295,7 @@ class Cart
         /**
          * #phnxdgtl Add tax to the entire basket
          **/
-        $total = $total_ex_tax + $this->tax();
+        $total = $total_ex_tax + $this->tax(2, '.', '');
 
         return $this->numberFormat($total, $decimals, $decimalPoint, $thousandSeparator);
     }
